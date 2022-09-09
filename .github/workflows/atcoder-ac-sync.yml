@@ -1,0 +1,43 @@
+name: Fetch Atcoder AC Submissions
+on:
+  workflow_dispatch:
+  schedule:
+    # You need to set your schedule here
+    - cron: '0 0 * * *'
+
+jobs:
+  pull_data:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      # If using Python:
+      - name: Pull data
+        run: node main.js
+
+      # NOTE: This commits everything in the `data` directory. Make sure this matches your needs
+      - name: Git commit
+        run: |
+          git add .
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Atcoder-AC-Submissions"
+
+      # NOTE: Check that your branch name is correct here
+      - name: Git push
+        run: |
+          git push "https://${GITHUB_ACTOR}:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
